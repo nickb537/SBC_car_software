@@ -1,6 +1,7 @@
 import pigpio
-
-import FourWheelDriveController from FourWheelDriveController
+import time
+from fourwheeldrivecontroller import FourWheelDriveController
+from stc3100 import STC3100
 			
 class HeadlightsController:
     def __init__(self, headlights_pin=26):
@@ -81,4 +82,4 @@ if __name__ == "__main__":
     finally:
         # Stop the car and perform cleanup
         car.stop()
-        car.cleanup()
+        #car.cleanup()

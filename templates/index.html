@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Car Control</title>
+</head>
+<body>
+    <h1>IoT Car Control</h1>
+    <div>
+        <canvas id="video-stream" width="640" height="480"></canvas>
+    </div>
+    <div>
+        <h2>Control the Car</h2>
+        <button id="up" class="control-button">↑</button>
+        <button id="down" class="control-button">↓</button>
+        <button id="left" class="control-button">←</button>
+        <button id="right" class="control-button">→</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+
+        const videoStream = document.getElementById('video-stream');
+        const upButton = document.getElementById('up');
+        const downButton = document.getElementById('down');
+        const leftButton = document.getElementById('left');
+        const rightButton = document.getElementById('right');
+
+        const keyMap = {
+            ArrowUp: upButton,
+            ArrowDown: downButton,
+            ArrowLeft: leftButton,
+            ArrowRight: rightButton
+        };
+
+        // Listen for keydown events
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (key in keyMap) {
+                event.preventDefault();
+                socket.emit('keydown', { key: key });
+                keyMap[key].classList.add('active');
+            }
+        });
+
+        // Listen for keyup events
+        document.addEventListener('keyup', (event) => {
+            const key = event.key;
+            if (key in keyMap) {
+                event.preventDefault();
+                socket.emit('keyup', { key: key });
+                keyMap[key].classList.remove('active');
+            }
+        });
+
+        // Update video stream
+        const videoCanvas = videoStream.getContext('2d');
+        const video = new Image();
+
+        video.onload = function () {
+            videoCanvas.drawImage(video, 0, 0, videoStream.width, videoStream.height);
+            requestAnimationFrame(updateVideoStream);
+        };
+
+        function updateVideoStream() {
+            video.src = '/video_feed';
+        }
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    </script>
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        .control-button {
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+        }
+
+        .active {
+            background-color: lightblue;
+        }
+    </style>
+</body>
+</html>
+
